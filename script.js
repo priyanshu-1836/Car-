@@ -1,7 +1,6 @@
 
-let scene, camera, renderer, car, road, enemyCars = [], score = 0, highScore = 0;
-let moveLeft = false, moveRight = false, boosting = false, speed = 0.3;
-const keys = { left: false, right: false };
+let scene, camera, renderer, car, road, enemyCars = [], trees = [], score = 0, highScore = 0;
+let keys = { left: false, right: false }, boosting = false, speed = 0.3;
 
 function init() {
   scene = new THREE.Scene();
@@ -23,7 +22,7 @@ function init() {
   // Road
   const roadGeo = new THREE.PlaneGeometry(10, 200);
   const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-  const road = new THREE.Mesh(roadGeo, roadMat);
+  road = new THREE.Mesh(roadGeo, roadMat);
   road.rotation.x = -Math.PI / 2;
   road.position.z = -90;
   scene.add(road);
@@ -35,7 +34,9 @@ function init() {
   car.position.y = 0.25;
   scene.add(car);
 
-  // Events
+  // Trees on roadside
+  addTrees();
+
   window.addEventListener('resize', onWindowResize);
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
@@ -44,8 +45,27 @@ function init() {
   document.getElementById("boostBtn").onmousedown = () => boosting = true;
   document.getElementById("boostBtn").onmouseup = () => boosting = false;
 
+  document.getElementById("leftBtn").onmousedown = () => keys.left = true;
+  document.getElementById("leftBtn").onmouseup = () => keys.left = false;
+  document.getElementById("rightBtn").onmousedown = () => keys.right = true;
+  document.getElementById("rightBtn").onmouseup = () => keys.right = false;
+
   spawnEnemies();
   animate();
+}
+
+function addTrees() {
+  const treeGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 8);
+  const treeMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+
+  for (let i = -100; i < 50; i += 10) {
+    const leftTree = new THREE.Mesh(treeGeo, treeMat);
+    const rightTree = new THREE.Mesh(treeGeo, treeMat);
+    leftTree.position.set(-6, 0.75, i);
+    rightTree.position.set(6, 0.75, i + 5);
+    trees.push(leftTree, rightTree);
+    scene.add(leftTree, rightTree);
+  }
 }
 
 function onWindowResize() {
@@ -95,13 +115,11 @@ function detectCollision(a, b) {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Car Movement
-  if (keys.left && car.position.x > -4) car.position.x -= speed;
-  if (keys.right && car.position.x < 4) car.position.x += speed;
-
   const currentSpeed = boosting ? speed * 2 : speed;
 
-  // Move enemies
+  if (keys.left && car.position.x > -4) car.position.x -= currentSpeed * 0.8;
+  if (keys.right && car.position.x < 4) car.position.x += currentSpeed * 0.8;
+
   enemyCars.forEach(enemy => {
     enemy.position.z += currentSpeed;
     if (enemy.position.z > 10) {
@@ -116,6 +134,11 @@ function animate() {
       alert("💥 Crash! Game Over.");
       restartGame();
     }
+  });
+
+  trees.forEach(tree => {
+    tree.position.z += currentSpeed;
+    if (tree.position.z > 20) tree.position.z = -100;
   });
 
   renderer.render(scene, camera);

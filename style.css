@@ -42,3 +42,26 @@ button:hover {
   padding: 10px 20px;
   border-radius: 10px;
 }
+
+#controls {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#leftBtn, #rightBtn {
+  padding: 14px 20px;
+  margin: 0 20px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#leftBtn:hover, #rightBtn:hover {
+  background-color: #fff;
+  color: #000;
+  transform: scale(1.1);
+}
