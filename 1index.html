@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Sharing Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .auth-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4757);
+        }
+
+        .admin-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area.dragover {
+            background: #f0f4ff;
+            border-color: #4c63d2;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .video-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .video-player {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .video-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .video-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Video Sharing Platform</h1>
+            <p>Admin Upload करे, सब देखें और Download करें</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="auth-section">
+            <h2 style="text-align: center; margin-bottom: 25px; color: #667eea;">Admin Login</h2>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" placeholder="admin" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="admin123" required>
+            </div>
+            <button class="btn" onclick="login()" style="width: 100%;">Login</button>
+            <div style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
+                Default: admin / admin123
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <div class="admin-header">
+                <h2 style="color: #667eea;">🔧 Admin Panel</h2>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+            
+            <div class="upload-area" onclick="document.getElementById('videoFile').click()">
+                <button class="upload-button">📁 Select Video File</button>
+                <p style="color: #666; margin-bottom: 0;">या यहाँ drag & drop करें</p>
+                <p style="color: #999; font-size: 14px;">Maximum file size: 100MB</p>
+                <input type="file" id="videoFile" class="file-input" accept="video/*" onchange="handleFileSelect(event)">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="videoTitle">Video Title:</label>
+                <input type="text" id="videoTitle" placeholder="Enter video title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="videoDescription">Video Description:</label>
+                <textarea id="videoDescription" rows="3" placeholder="Enter video description"></textarea>
+            </div>
+
+            <button class="btn" onclick="uploadVideo()" id="uploadBtn" style="width: 100%;">
+                📤 Upload Video
+            </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="messageArea"></div>
+
+        <!-- Public Video Gallery -->
+        <div id="videoGallery" class="video-gallery"></div>
+    </div>
+
+    <script>
+        let isAdmin = false;
+        let selectedFile = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVideos();
+            setupDragAndDrop();
+        });
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            const uploadArea = document.querySelector('.upload-area');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('video/')) {
+                    selectedFile = files[0];
+                    showMessage(`File selected: ${files[0].name}`, 'success');
+                }
+            });
+        }
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                isAdmin = true;
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                showMessage('Admin login successful!', 'success');
+            } else {
+                showMessage('Invalid credentials!', 'error');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            isAdmin = false;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showMessage('Logged out successfully!', 'success');
+        }
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('video/')) {
+                if (file.size > 100 * 1024 * 1024) { // 100MB limit
+                    showMessage('File size too large! Maximum 100MB allowed.', 'error');
+                    return;
+                }
+                selectedFile = file;
+                showMessage(`File selected: ${file.name}`, 'success');
+            } else {
+                showMessage('Please select a valid video file!', 'error');
+            }
+        }
+
+        // Upload video
+        function uploadVideo() {
+            if (!selectedFile) {
+                showMessage('Please select a video file first!', 'error');
+                return;
+            }
+
+            const title = document.getElementById('videoTitle').value.trim();
+            if (!title) {
+                showMessage('Please enter a video title!', 'error');
+                return;
+            }
+
+            const description = document.getElementById('videoDescription').value.trim();
+            
+            // Show progress bar
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            progressBar.style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            // Simulate upload progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 95) {
+                    progress = 95;
+                    clearInterval(interval);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+
+            // Process file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                clearInterval(interval);
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    const videoData = {
+                        id: Date.now(),
+                        title: title,
+                        description: description,
+                        data: e.target.result,
+                        filename: selectedFile.name,
+                        size: selectedFile.size,
+                        uploadDate: new Date().toLocaleDateString('hi-IN')
+                    };
+
+                    // Save to localStorage
+                    const videos = JSON.parse(localStorage.getItem('videos') || '[]');
+                    videos.push(videoData);
+                    localStorage.setItem('videos', JSON.stringify(videos));
+
+                    // Reset form
+                    document.getElementById('videoTitle').value = '';
+                    document.getElementById('videoDescription').value = '';
+                    document.getElementById('videoFile').value = '';
+                    selectedFile = null;
+                    
+                    // Hide progress bar
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = '📤 Upload Video';
+
+                    showMessage('Video uploaded successfully!', 'success');
+                    loadVideos();
+                }, 1000);
+            };
+
+            reader.readAsDataURL(selectedFile);
+        }
+
+        // Load and display videos
+        function loadVideos() {
+            const videos = JSON.parse(localStorage.getItem('videos') || '[]');
+            const gallery = document.getElementById('videoGallery');
+            
+            if (videos.length === 0) {
+                gallery.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: white;">
+                        <h3>🎬 कोई videos नहीं मिलीं</h3>
+                        <p>Admin को videos upload करने के लिए login करना होगा।</p>
+                    </div>
+                `;
+                return;
+            }
+
+            gallery.innerHTML = videos.map(video => `
+                <div class="video-card">
+                    <video class="video-player" controls preload="metadata">
+                        <source src="${video.data}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-description">${video.description || 'No description'}</div>
+                        <div style="color: #999; font-size: 12px; margin-bottom: 15px;">
+                            📅 ${video.uploadDate} • 📁 ${formatFileSize(video.size)}
+                        </div>
+                        <div class="video-actions">
+                            <button class="btn" onclick="downloadVideo('${video.id}')">
+                                💾 Download
+                            </button>
+                            ${isAdmin ? `<button class="btn btn-danger" onclick="deleteVideo('${video.id}')">🗑️ Delete</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Download video
+        function downloadVideo(videoId) {
+            const videos = JSON.parse(localStorage.getItem('videos') || '[]');
+            const video = videos.find(v => v.id == videoId);
+            
+            if (video) {
+                const link = document.createElement('a');
+                link.href = video.data;
+                link.download = video.filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage('Download started!', 'success');
+            }
+        }
+
+        // Delete video (admin only)
+        function deleteVideo(videoId) {
+            if (!isAdmin) return;
+            
+            if (confirm('Are you sure you want to delete this video?')) {
+                let videos = JSON.parse(localStorage.getItem('videos') || '[]');
+                videos = videos.filter(v => v.id != videoId);
+                localStorage.setItem('videos', JSON.stringify(videos));
+                showMessage('Video deleted successfully!', 'success');
+                loadVideos();
+            }
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Refresh video gallery when admin status changes
+        setInterval(() => {
+            const currentAdminStatus = isAdmin;
+            if (window.lastAdminStatus !== currentAdminStatus) {
+                loadVideos();
+                window.lastAdminStatus = currentAdminStatus;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
